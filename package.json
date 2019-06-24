@@ -1,0 +1,26 @@
+{
+  "name": "test-embedded-node-red",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "arduino-iot-js": "^0.4.4",
+    "client-oauth2": "^4.2.4",
+    "express": "^4.17.1",
+    "express-session": "^1.16.2",
+    "memorystore": "^1.6.1",
+    "node-fetch": "^2.6.0",
+    "node-red": "^0.20.5",
+    "node-red-contrib-arduino-iot-input": "file:node-red-contrib-arduino-iot-input",
+    "node-red-contrib-arduino-iot-output": "file:node-red-contrib-arduino-iot-output",
+    "ws": "^7.0.1"
+  },
+  "devDependencies": {
+    "babel-polyfill": "^6.26.0"
+  }
+}
