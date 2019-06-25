@@ -50,7 +50,8 @@ var settings = {
   httpNodeRoot: "/api",
   userDir:"/Users/andreacatozzi/.nodered/",
   functionGlobalContext: { 
-  }    // enables global context
+  },   // enables global context
+  credentialSecret: "Arduino IoT"
 };
 
 // Create a server
@@ -67,8 +68,12 @@ app.get('/oauth/redirect', function (req, res) {
         refreshToken: user.refreshToken
       };
       fs.writeFile('/Users/andreacatozzi/.nodered/oauth.json', JSON.stringify(user.data), 'utf8', (err, data) => {
-        console.log(err);
+        if (err) 
+          console.log("writeFile error: " + err);
       });
+      if (RED.settings.functionGlobalContext.ArduinoMessageClient) {
+        return res.redirect('/red');
+      }
       initArduinoClients(user, RED)
       .then( () => {
         // Start the runtime
@@ -114,7 +119,7 @@ fs.readFile('/Users/andreacatozzi/.nodered/oauth.json', 'utf8', (err, data) => {
       });
     })
     .catch(err => {
-      console.log(err);
+      console.log("createToken error:" + err);
     });
   }
 });
@@ -126,7 +131,7 @@ async function initArduinoClients(u, r) {
     await arduinCloudMessageApi.connect(ArduinoCloudOptions);
     r.settings.functionGlobalContext.ArduinoMessageClient = arduinCloudMessageApi;
   } catch ( err ) {
-    console.log(err);
+    console.log("initArduinoClients error:" + err);
   };  
 }
 
@@ -136,11 +141,10 @@ app.use(settings.httpAdminRoot, function (req, res, next) {
     return next();
   } 
   var uri = ArduinoOAuthClient.code.getUri();
-  console.log(uri);
-  if (req.url != "/comms")
-    return res.redirect(uri)
+  if (req.url == "/comms" || req.xhr)
+    return next();
   else
-    return res.end();
+    return res.redirect(uri)
 }, RED.httpAdmin);
 
 // Serve the http nodes UI from /api
@@ -169,7 +173,11 @@ app.get('/red/properties', function (req, res) {
 })
 
 app.get('/*', function (req, res) {
-  return res.redirect('/red');
+  if (req.url == "/comms" || req.xhr) {
+    return res.end();
+  } else {
+    return res.redirect('/red');
+  }
 })
 
 

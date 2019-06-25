@@ -14,6 +14,11 @@ module.exports = function(RED) {
             }            
           );
         }).then(() => {
+          node.on('close', function(done) {
+            ArdarduinCloudMessageClient.removePropertyValueCallback(config.thing, config.property).then( () => {
+              done();
+            });
+          });
         });
       }
   }
