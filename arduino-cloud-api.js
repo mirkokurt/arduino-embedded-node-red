@@ -32,6 +32,9 @@ class ArduinoCloudClient {
   constructor(token) {
     this.token = token;
   }
+  updateToken(token) {
+    this.token = token;
+  }
   getUserId() {
     const url = `${authUrl}/users/byID/me`;
     return this.genericRequest(url, 'get', '');

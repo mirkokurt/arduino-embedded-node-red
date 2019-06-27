@@ -72,10 +72,20 @@ app.get('/oauth/redirect', function (req, res) {
           console.log("writeFile error: " + err);
       });
       if (RED.settings.functionGlobalContext.ArduinoMessageClient) {
+        RED.settings.functionGlobalContext.ArduinoRestClient.getUserId()
+        .then( u => {
+          req.session.user.id = u.id;
+          req.session.user.username=  u.username;
+        });
         return res.redirect('/red');
       }
       initArduinoClients(user, RED)
       .then( () => {
+        RED.settings.functionGlobalContext.ArduinoRestClient.getUserId()
+        .then( u => {
+          req.session.user.id = u.id;
+          req.session.user.username=  u.username;
+        });
         // Start the runtime
         if (!REDisRunning) {
           REDisRunning = true;
@@ -132,7 +142,20 @@ async function initArduinoClients(u, r) {
     r.settings.functionGlobalContext.ArduinoMessageClient = arduinCloudMessageApi;
   } catch ( err ) {
     console.log("initArduinoClients error:" + err);
-  };  
+  };
+  // Manage the expiration of the token
+  setTimeout(() => {
+    ArduinoOAuthClient.createToken(u.data.access_token, u.data.refresh_token, u.data.token_type, u.data).refresh()
+    .then(updatedUser => {
+      r.settings.functionGlobalContext.ArduinoRestClient.updateToken(updatedUser.data.access_token);
+      r.settings.functionGlobalContext.ArduinoMessageClient.updateToken(updatedUser.data.access_token);
+      fs.writeFile('/Users/andreacatozzi/.nodered/oauth.json', JSON.stringify(updatedUser.data), 'utf8', (err, data) => {
+        if (err)
+          console.log(err);
+      });
+    });
+  }, (u.data.expires_in - 60) * 1000);
+
 }
 
 // Serve the editor UI from /red
