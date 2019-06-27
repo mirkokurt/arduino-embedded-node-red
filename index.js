@@ -51,7 +51,12 @@ var settings = {
   userDir:"/Users/andreacatozzi/.nodered/",
   functionGlobalContext: { 
   },   // enables global context
-  credentialSecret: "Arduino IoT"
+  credentialSecret: "Arduino IoT",
+  editorTheme: {
+    projects: {
+        enabled: true
+    }
+  }
 };
 
 // Create a server
