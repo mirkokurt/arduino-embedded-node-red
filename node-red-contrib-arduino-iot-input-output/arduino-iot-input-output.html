@@ -1,0 +1,85 @@
+<script type="text/javascript">
+  RED.nodes.registerType('Property-in-out',{
+      category: 'Arduino IoT Cloud',
+      color: '#a6bbcf',
+      defaults: {
+          thing: {value:""},  
+          property: {value:""},
+          name: {value:""}
+      },
+      inputs:1,
+      outputs:1,
+      icon: "bridge.png",
+      label: function() {
+          return this.name||"Property";
+      },
+      paletteLabel: "Property",
+      oneditprepare: function() {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+        $( "#node-input-name" ).val(this.name);
+        $.getJSON('/red/things' , things => {
+          $("<option value='" + 0 + "'> " + "Select a thing" + "</option>").appendTo("#node-input-thing");
+          for (const t of things) {
+            $("<option value='" + t.id + "'> " + t.name + "</option>").appendTo("#node-input-thing");
+          }
+          if (this.thing) {
+            console.log("thing_id: " + this.thing);
+            initiProperties(this.thing, this.property);
+            $("#node-input-thing").val(this.thing);
+//            $('#node-input-thing').trigger('change');
+          }
+        });
+        $("#node-input-thing").change( () => {
+          const thing_id = $( "#node-input-thing" ).val();
+          if (thing_id && thing_id !== "0") {
+            initiProperties(thing_id);
+          }
+        });
+        $("#node-input-property").change( () => {
+          const property_name = $("#node-input-property").val();
+          if (property_name && property_name !== "") {
+            $( "#node-input-name" ).val(property_name);
+          }
+        });
+      },
+      oneditsave: function () {
+        console.log("thing_id: " + this.thing);
+        console.log("property_id: " + this.property);
+      }
+  });
+  function initiProperties(thing_id, property_name) {
+    $("#node-input-property").html("");
+    $.getJSON(`/red/properties?thing_id=${thing_id}` , properties => {
+      $("<option value='" + 0 + "'> " + "Select a property" + "</option>").appendTo("#node-input-property");
+      for (const p of properties) {
+        $("<option value='" + p.name + "'> " + p.name + "</option>").appendTo("#node-input-property");
+      }
+      if (property_name) {
+        $("#node-input-property").val(property_name);
+//        $('#node-input-property').trigger('change');
+      }
+    });
+  }
+</script>
+
+<script type="text/x-red" data-template-name="Property-in-out">
+  <div class="form-row">
+    <label for="node-input-thing"><i class="icon-tag"></i> Thing</label>
+    <select id="node-input-thing">
+    </select>
+  </div>
+  <div class="form-row">
+      <label for="node-input-property"><i class="icon-tag"></i> Property</label>
+      <select id="node-input-property">
+      </select>
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="Property-in-out">
+  <p>A first tentative to implement an Arduino IoT Cloud node-red node</p>
+</script>

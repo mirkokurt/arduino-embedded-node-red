@@ -18,6 +18,7 @@
     "node-red": "^0.20.5",
     "node-red-contrib-arduino-iot-input": "file:node-red-contrib-arduino-iot-input",
     "node-red-contrib-arduino-iot-output": "file:node-red-contrib-arduino-iot-output",
+	"node-red-contrib-arduino-iot-input-output": "file:node-red-contrib-arduino-iot-input-output",
     "ws": "^7.0.1"
   },
   "devDependencies": {

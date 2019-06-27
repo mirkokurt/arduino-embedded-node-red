@@ -1,0 +1,16 @@
+{
+  "name": "node-red-contrib-arduino-iot-input-output",
+  "version": "1.0.0",
+  "description": "",
+  "main": "arduino-iot-input-output.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "node-red" : {
+    "nodes": {
+        "Property-in-out": "arduino-iot-input-output.js"
+    }
+}
+}
