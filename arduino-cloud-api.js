@@ -21,9 +21,9 @@
 
 const request = require('request');
 const envUrl =
-  process.env.IOT_API_BASE_URL || 'https://api-dev.arduino.cc/iot/v1'; // TO BE MODIFIED for production environment
+  process.env.IOT_API_BASE_URL || 'https://api-dev.arduino.cc/iot/v1'; 
 const authUrl =
-  process.env.AUTH_API_BASE_URL || 'https://auth-dev.arduino.cc/v1'; // TO BE MODIFIED for production environment
+  process.env.AUTH_API_BASE_URL || 'https://auth-dev.arduino.cc/v1'; 
 
 function log(title, msg) {
   console.log(`[${title}] ${msg}`);
