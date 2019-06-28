@@ -1,4 +1,5 @@
 const http = require('http');
+const os = require('os');
 const express = require("express");
 const RED = require("node-red");
 let REDisRunning = false;
@@ -17,12 +18,19 @@ global["Headers"] = Headers;
 const WebSocket = require('ws');	
 global["WebSocket"] = WebSocket;
 
+const clientId = process.env.NODE_RED_CLIENT_ID || 'node-red';
+const clientSecret = process.env.NODE_RED_CLIENT_SECRET || 'gT4jLtBC48BC3WfUpgLjSugwak7KjHjD';
+const accessTokenUri = process.env.NODE_RED_ACCESS_TOKEN_URI || 'https://hydra-dev.arduino.cc/oauth2/token';
+const authorizationUri = process.env.NODE_RED_AUTHORIZATION_URI || 'https://hydra-dev.arduino.cc/oauth2/auth';
+const redirectUri = process.env.NODE_RED_REDIRECT_URI || 'http://localhost:8080/oauth/redirect';
+
+
 let ArduinoOAuthClient = new ClientOAuth2({
-  clientId: 'wsrs_manager',
-  clientSecret: 'K89YAwh7aAeBLbMsZ3rFuPYwqTrG3ZMC',
-  accessTokenUri: 'https://hydra-dev.arduino.cc/oauth2/token',
-  authorizationUri: 'https://hydra-dev.arduino.cc/oauth2/auth',
-  redirectUri: 'http://localhost:8080/oauth/redirect',
+  clientId: clientId,
+  clientSecret: clientSecret,
+  accessTokenUri: accessTokenUri,
+  authorizationUri: authorizationUri,
+  redirectUri: redirectUri,
   state: randomString(8),
   scopes: ['profile:core', 'iot:devices', 'iot:things', 'iot:properties', 'offline'],
   access_type : 'code'
@@ -44,14 +52,19 @@ app.use(session({
   saveUninitialized: false
 }))
 
-// Create the settings object - see default settings.js file for other options
+const homeDir = os.homedir();
 var settings = {
   httpAdminRoot:"/red",
   httpNodeRoot: "/api",
-  userDir:"/Users/andreacatozzi/.nodered/",
+  userDir:homeDir + "/.nodered/",
   functionGlobalContext: { 
   },   // enables global context
-  credentialSecret: "Arduino IoT"
+  credentialSecret: "Arduino IoT",
+  editorTheme: {
+    projects: {
+        enabled: true
+    }
+  }
 };
 
 // Create a server
@@ -67,7 +80,7 @@ app.get('/oauth/redirect', function (req, res) {
         accessToken: user.accessToken,
         refreshToken: user.refreshToken
       };
-      fs.writeFile('/Users/andreacatozzi/.nodered/oauth.json', JSON.stringify(user.data), 'utf8', (err, data) => {
+      fs.writeFile(homeDir + '/.nodered/oauth.json', JSON.stringify(user.data), 'utf8', (err, data) => {
         if (err) 
           console.log("writeFile error: " + err);
       });
@@ -98,24 +111,27 @@ app.get('/oauth/redirect', function (req, res) {
       });
     })
     .catch(err => {
-      return res.redirect('/404.html')
+      return res.code(404).end();
     })
 })
 
+const mqttHost = process.env.IOT_MQTTHOST_URL || 'wss.iot.oniudra.cc';
+const authApiUrl = process.env.IOT_MQTTHOST_URL || 'https://auth-dev.arduino.cc';
+
 ArduinoCloudOptions = {
-  host: "wss.iot.oniudra.cc",
+  host: mqttHost,
   port: 8443,
   ssl: true,             
-  apiUrl: 'https://auth-dev.arduino.cc',
+  apiUrl: authApiUrl,
   useCloudProtocolV2: true
 }
 
-fs.readFile('/Users/andreacatozzi/.nodered/oauth.json', 'utf8', (err, data) => {
+fs.readFile(homeDir + '/.nodered/oauth.json', 'utf8', (err, data) => {
   if (!err){
     const pData = JSON.parse(data);
     ArduinoOAuthClient.createToken(pData.access_token, pData.refresh_token, pData.token_type, pData).refresh()
     .then(updatedUser => {
-      fs.writeFile('/Users/andreacatozzi/.nodered/oauth.json', JSON.stringify(updatedUser.data), 'utf8', (err, data) => {
+      fs.writeFile(homeDir + '/.nodered/oauth.json', JSON.stringify(updatedUser.data), 'utf8', (err, data) => {
         if (err)
           console.log(err);
       });
